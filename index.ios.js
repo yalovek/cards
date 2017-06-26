@@ -7,20 +7,6 @@ import {
 
 import Deck from './components/Deck';
 
-const CARDS = [
-  {
-    backgroundColor: '#f00',
-  },
-  {
-    backgroundColor: '#0f0',
-  },
-  {
-    backgroundColor: '#00f',
-  },
-  {
-    backgroundColor: '#ff0',
-  },
-];
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -33,7 +19,20 @@ class Cards extends Component {
     super(props);
 
     this.state = {
-      cards: CARDS,
+      cards: [
+        {
+          backgroundColor: '#f00',
+        },
+        {
+          backgroundColor: '#0f0',
+        },
+        {
+          backgroundColor: '#00f',
+        },
+        {
+          backgroundColor: '#ff0',
+        },
+      ],
     };
   }
 
