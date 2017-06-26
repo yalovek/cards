@@ -4,6 +4,7 @@ import {
   Dimensions,
   Animated,
   PanResponder,
+  LayoutAnimation,
 } from 'react-native';
 
 import Card from './Card';
@@ -13,7 +14,6 @@ const SCREEN_HEIGHT = Dimensions.get('window').height;
 const PADDING = 25;
 const CARD_WIDTH = SCREEN_WIDTH - PADDING * 2;
 const CARD_HEIGHT = SCREEN_HEIGHT - 150;
-const SWIPE_THRESHOLD = SCREEN_WIDTH * .3;
 const SHIFT_TOP = 10;
 const SQUEEZE = 20;
 const styles = StyleSheet.create({
@@ -36,67 +36,59 @@ export default class extends Component {
     this.state = {
       cards: props.cards,
       cardsLength,
-      direction: 'right',
     };
-    this.state.pan = new Animated.ValueXY({
-      x: this.state.direction === 'right' ? SCREEN_WIDTH - CARD_WIDTH - PADDING : SCREEN_WIDTH - CARD_WIDTH - SQUEEZE * cardsLength - PADDING,
-      y: this.state.direction === 'right' ? SHIFT_TOP * cardsLength : 0,
-    });
+
+    this.direction = 'right';
+
+    this.pan = {
+      left: this.direction === 'right' ? SCREEN_WIDTH - CARD_WIDTH - PADDING : SCREEN_WIDTH - CARD_WIDTH + (SQUEEZE * cardsLength) / 2 - PADDING,
+      top: this.direction === 'right' ? SHIFT_TOP * cardsLength : 0,
+    };
+
     this.state.panResponder = PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderMove: Animated.event([null, {
-        dx: this.state.pan.x,
-        dy: this.state.pan.y,
-      }]),
+          dx: this.pan.left,
+          dy: this.pan.top
+        }
+      ]),
       onPanResponderRelease: (event, { dx }) => {
-        if (dx > SWIPE_THRESHOLD) {
+        if (dx > 0) {
           this.swipe('right');
-        } else if (dx < -SWIPE_THRESHOLD) {
+        } else if (dx < 0) {
           this.swipe('left');
         }
       },
     });
   }
 
+  componentWillUpdate() {
+    LayoutAnimation.spring();
+  }
+
   swipe = (direction) => {
-    const { cardsLength } = this.state;
+    this.direction = direction;
 
-    this.setState({
-      direction,
-    });
-
-    Animated.spring(
-      this.state.pan,
-      {
-        toValue: {
-          x: SCREEN_WIDTH * 1.5,
-          y: SHIFT_TOP * cardsLength,
-        },
-      },
-    ).start(() => this.onSwipeComplete(direction));
+    this.onSwipeComplete(direction);
   }
 
   onSwipeComplete = (direction) => {
     const { cards, cardsLength } = this.state;
 
     if (direction === 'right') {
-      this.setState({
-        pan: new Animated.ValueXY({
-          x: SCREEN_WIDTH - CARD_WIDTH - PADDING,
-          y: SHIFT_TOP * cardsLength,
-        }),
-      });
+      this.pan = {
+        left: SCREEN_WIDTH - CARD_WIDTH - PADDING,
+        top: SHIFT_TOP * cardsLength,
+      };
 
       this.setState({
         cards: [].concat(cards.slice(-1), cards.slice(0, -1)),
       });
     } else {
-      this.setState({
-        pan: new Animated.ValueXY({
-          x: SCREEN_WIDTH - (CARD_WIDTH - SQUEEZE * cardsLength) - PADDING * 2,
-          y: 0,
-        }),
-      });
+      this.pan = {
+        left: SCREEN_WIDTH - CARD_WIDTH + (SQUEEZE * cardsLength) / 2 - PADDING,
+        top: 0,
+      };
 
       this.setState({
         cards: [].concat(cards.slice(1), cards.slice(0, 1)),
@@ -105,7 +97,7 @@ export default class extends Component {
   }
 
   getCardStyle = (direction) => {
-    return this.state.direction === direction ? this.state.pan.getLayout() : {};
+    return this.direction === direction ? this.pan : {};
   }
 
   render() {
