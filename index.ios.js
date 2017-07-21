@@ -32,6 +32,30 @@ class Cards extends Component {
         {
           backgroundColor: '#ff0',
         },
+        {
+          backgroundColor: '#f00',
+        },
+        {
+          backgroundColor: '#0f0',
+        },
+        {
+          backgroundColor: '#00f',
+        },
+        {
+          backgroundColor: '#ff0',
+        },
+        {
+          backgroundColor: '#f00',
+        },
+        {
+          backgroundColor: '#0f0',
+        },
+        {
+          backgroundColor: '#00f',
+        },
+        {
+          backgroundColor: '#ff0',
+        },
       ],
     };
   }
